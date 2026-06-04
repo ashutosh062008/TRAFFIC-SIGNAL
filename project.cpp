@@ -72,21 +72,18 @@ vector<TrafficInterval> takeInput(int &n)
         cout << "West Road Vehicles  : ";
         cin >> data[i].west;
 
-        // Basic validation
+       
+        
         data[i].north = max(0, data[i].north);
         data[i].south = max(0, data[i].south);
-        data[i].east  = max(0, data[i].east);
-        data[i].west  = max(0, data[i].west);
+        data[i].east = max(0, data[i].east);
+        data[i].west = max(0, data[i].west);
     }
 
     return data;
 }
 
-// ============================================================
-//                 DYNAMIC SERVICE RATE
-// ============================================================
-// Returns vehicles/sec based on current congestion.
-// Higher queue -> slightly better utilization.
+
 int getServiceRate(int queue)
 {
     if (queue < 20)
@@ -107,7 +104,8 @@ SimulationResult simulate(vector<TrafficInterval> &data,
 {
     SimulationResult result;
 
-    // Total cycle time = 80 seconds
+    
+    
     result.greenTime = greenTime;
     result.redTime = 80 - greenTime;
 
@@ -119,7 +117,8 @@ SimulationResult simulate(vector<TrafficInterval> &data,
 
     double totalWait = 0.0;
 
-    // Separate queues for each road
+    
+    
     int northQueue = 0;
     int southQueue = 0;
     int eastQueue = 0;
@@ -148,47 +147,45 @@ SimulationResult simulate(vector<TrafficInterval> &data,
         vector<pair<string, int>> roads = {
             {"North", d.north},
             {"South", d.south},
-            {"East",  d.east},
-            {"West",  d.west}
-        };
+            {"East", d.east},
+            {"West", d.west}};
 
-        vector<int*> queues = {
+        vector<int *> queues = {
             &northQueue,
             &southQueue,
             &eastQueue,
-            &westQueue
-        };
+            &westQueue};
 
         for (int i = 0; i < 4; i++)
         {
-            // Add incoming vehicles to queue
+            
+            
             *queues[i] += roads[i].second;
             result.totalVehicles += roads[i].second;
 
             int currentQueue = *queues[i];
 
-            // Dynamic service rate
+            
+            
             int serviceRate = getServiceRate(currentQueue);
 
-            // Realistic capacity adjustment
-            // Reduced by factor of 4 to model start-up delays,
-            // reaction time, lane inefficiencies, etc.
+          
             int capacity = max(1, (greenTime * serviceRate) / 4);
 
-            // Vehicles that pass during green
+           
             int served = min(currentQueue, capacity);
 
-            // Update queue
+            
             *queues[i] -= served;
 
-            // Update statistics
+            
             result.totalServed += served;
             result.peakQueue = max(result.peakQueue, *queues[i]);
 
-            // Approximate waiting time contribution
+            
             totalWait += (*queues[i] * result.redTime) / 2.0;
 
-            // Congestion level
+           
             string level;
             if (*queues[i] < 10)
                 level = "LOW";
@@ -197,7 +194,7 @@ SimulationResult simulate(vector<TrafficInterval> &data,
             else
                 level = "HIGH";
 
-            // Display row if requested
+           
             if (showTable)
             {
                 cout << left
@@ -212,11 +209,10 @@ SimulationResult simulate(vector<TrafficInterval> &data,
         }
     }
 
-    // Total leftover across all roads
     result.leftoverVehicles =
         northQueue + southQueue + eastQueue + westQueue;
 
-    // Average waiting time per vehicle
+    
     if (result.totalVehicles > 0)
         result.avgWaitTime = totalWait / result.totalVehicles;
     else
@@ -231,7 +227,7 @@ SimulationResult simulate(vector<TrafficInterval> &data,
 
 SimulationResult optimizeSignal(vector<TrafficInterval> &data)
 {
-    // Green time search range (cycle = 80 sec)
+    
     int lo = 15;
     int hi = 60;
 
@@ -259,14 +255,14 @@ SimulationResult optimizeSignal(vector<TrafficInterval> &data)
         SimulationResult current = simulate(data, mid);
         SimulationResult next = simulate(data, mid + 1);
 
-        // Track best result
+    
         if (current.avgWaitTime < bestWait)
         {
             bestWait = current.avgWaitTime;
             optimalGreen = mid;
         }
 
-        // Display current test
+        
         cout << left
              << setw(8) << step
              << setw(12) << mid
@@ -274,7 +270,7 @@ SimulationResult optimizeSignal(vector<TrafficInterval> &data)
              << current.avgWaitTime
              << "\n";
 
-        // Binary search direction
+       
         if (next.avgWaitTime < current.avgWaitTime)
             lo = mid + 1;
         else
@@ -285,7 +281,7 @@ SimulationResult optimizeSignal(vector<TrafficInterval> &data)
 
     cout << "--------------------------------------\n";
 
-    // Run final simulation with detailed table
+    
     return simulate(data, optimalGreen, true);
 }
 
@@ -365,3 +361,6 @@ int main()
 
     return 0;
 }
+
+   
+           
